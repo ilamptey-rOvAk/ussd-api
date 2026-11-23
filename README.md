@@ -6,7 +6,7 @@ the user and walks them through two menu screens.
 
 **USSD code:** `*920*100#`
 
-**Live endpoint:** `https://YOUR-APP.onrender.com/ussd`
+**Live endpoint:** `https://ussd-mini-project-4.onrender.com/ussd`
 
 ## How it works
 
