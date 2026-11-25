@@ -65,7 +65,7 @@ def ussd(req:NALORequest):
         msg = msg[:120]
 
     reply = {
-        "USERID": req.USERID or "Karlson1",
+        "USERID": req.USERID or "AIK12356",
         "MSISDN": req.MSISDN,
         "MSG":msg,
         "MSGTYPE": keep_open,
