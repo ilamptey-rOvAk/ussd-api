@@ -31,8 +31,8 @@ sessions = {}
 def ussd(req:NALORequest):
     log.info(f"IN: {req}")
     if req.MSGTYPE:
-        #msg = "Hello!\n" + OPTIONS
-        msg = f"Hello {req.USERID}!\n" + OPTIONS
+        msg = "Hello! AIK\n" + OPTIONS
+        #msg = f"Hello {req.USERID}!\n" + OPTIONS
         # msg = f"Hello {req.MSISDN}!\n" + OPTIONS
 
         keep_open = True
