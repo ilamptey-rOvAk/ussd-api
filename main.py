@@ -2,7 +2,6 @@ from fastapi import FastAPI
 from pydantic import BaseModel
 import logging
 
-from starlette.middleware import sessions
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(message)s")
 log = logging.getLogger("ussd")
