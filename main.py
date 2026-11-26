@@ -31,13 +31,20 @@ class NALORequest(BaseModel):
     SESSIONID: str = ""
 
 
-# Welcome menu
-OPTIONS = (
-    "How are you feeling today?\n"
-    "1. Feeling fine\n"
-    "2. Feeling sad\n"
-    "3. Feeling frisky"
-)
+# Main menu options
+feelings = {
+    "1": "Feeling fine",
+    "2": "Feeling sad",
+    "3": "Feeling frisky"
+}
+
+
+# Reason options
+reasons = {
+    "1": "Relationship issues",
+    "2": "Money problems",
+    "3": "Family issues"
+}
 
 
 # Store user sessions
@@ -51,72 +58,88 @@ def ussd(req: NALORequest):
     log.info(f"IN: {req}")
 
     if req.MSGTYPE:
-        msg = "Hello! AIK\n" + OPTIONS
+
+        msg = (
+            "How are you feeling today?\n"
+            "1. Feeling fine\n"
+            "2. Feeling sad\n"
+            "3. Feeling frisky"
+        )
+
         keep_open = True
 
     else:
+
         choice = req.USERDATA.strip()
-        keep_open = False
+        session_id = req.SESSIONID
 
-        # User selected a reason after choosing Feeling sad
-        if sessions.get(req.SESSIONID) == "sad_menu":
+        # Check if the user already selected a feeling
+        if session_id in sessions:
 
-            sessions.pop(req.SESSIONID)
+            selected_reason = reasons.get(choice)
 
-            if choice == "1":
+            if selected_reason:
+
+                # Retrieve the feeling stored in the session
+                selected_feeling = sessions[session_id]["feeling"]
+
+                # Combine the feeling and reason
                 msg = (
-                    "Relationships can be difficult sometimes. "
-                    "Stay strong, communicate and remember that things can get better."
+                    f"You are {selected_feeling.lower()} "
+                    f"because of {selected_reason.lower()}."
                 )
 
-            elif choice == "2":
-                msg = (
-                    "Financial challenges are temporary. "
-                    "Stay focused, plan wisely and keep working towards better days."
-                )
+                # Remove the session after the final response
+                sessions.pop(session_id)
 
-            elif choice == "3":
-                msg = (
-                    "Family challenges can be difficult. "
-                    "Be patient, stay strong and never lose hope."
-                )
+                keep_open = False
 
             else:
-                msg = "Invalid choice. Please dial again."
 
-        # User selected Feeling fine
-        elif choice == "1":
+                # Display the reason menu again if the choice is invalid
+                selected_feeling = sessions[session_id]["feeling"]
 
-            msg = (
-                "That's wonderful! Keep smiling, stay positive "
-                "and have a beautiful day."
-            )
+                msg = (
+                    f"Why are you {selected_feeling.lower()}?\n"
+                    "1. Relationship issues\n"
+                    "2. Money problems\n"
+                    "3. Family issues"
+                )
 
-        # User selected Feeling sad
-        elif choice == "2":
+                keep_open = True
 
-            msg = (
-                "Sorry to hear that.\n"
-                "1. Relationship issues\n"
-                "2. Money problems\n"
-                "3. Family issues"
-            )
-
-            keep_open = True
-            sessions[req.SESSIONID] = "sad_menu"
-
-        # User selected Feeling frisky
-        elif choice == "3":
-
-            msg = "Ooh, frisky! Enjoy your day and stay safe."
-
-        # Invalid selection
         else:
 
-            msg = (
-                "Invalid choice. "
-                "Please dial again and pick 1, 2 or 3."
-            )
+            # Retrieve the feeling selected by the user
+            selected_feeling = feelings.get(choice)
+
+            if selected_feeling:
+
+                # Store the selected feeling in the session
+                sessions[session_id] = {
+                    "stage": "reason_menu",
+                    "feeling": selected_feeling
+                }
+
+                # Display the reason menu
+                msg = (
+                    f"Why are you {selected_feeling.lower()}?\n"
+                    "1. Relationship issues\n"
+                    "2. Money problems\n"
+                    "3. Family issues"
+                )
+
+                keep_open = True
+
+            else:
+
+                # Invalid main menu selection
+                msg = (
+                    "Invalid choice. "
+                    "Please select 1, 2 or 3."
+                )
+
+                keep_open = True
 
     # Keep the response within 120 characters
     if len(msg) > 120:
