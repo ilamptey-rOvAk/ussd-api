@@ -21,7 +21,6 @@ def home():
     return {"Status": "USSD api is alive"}
 
 
-# NALO request structure
 class NALORequest(BaseModel):
     USERID: str = ""
     MSISDN: str = ""
@@ -31,7 +30,7 @@ class NALORequest(BaseModel):
     SESSIONID: str = ""
 
 
-# Main menu options
+
 feelings = {
     "1": "Feeling fine",
     "2": "Feeling sad",
@@ -39,7 +38,7 @@ feelings = {
 }
 
 
-# Reason options
+
 reasons = {
     "1": "Relationship issues",
     "2": "Money problems",
@@ -47,11 +46,11 @@ reasons = {
 }
 
 
-# Store user sessions
+
 sessions = {}
 
 
-# USSD endpoint
+
 @app.post("/ussd")
 def ussd(req: NALORequest):
 
@@ -73,30 +72,30 @@ def ussd(req: NALORequest):
         choice = req.USERDATA.strip()
         session_id = req.SESSIONID
 
-        # Check if the user already selected a feeling
+    
         if session_id in sessions:
 
             selected_reason = reasons.get(choice)
 
             if selected_reason:
 
-                # Retrieve the feeling stored in the session
+                
                 selected_feeling = sessions[session_id]["feeling"]
 
-                # Combine the feeling and reason
+                
                 msg = (
                     f"You are {selected_feeling.lower()} "
                     f"because of {selected_reason.lower()}."
                 )
 
-                # Remove the session after the final response
+                
                 sessions.pop(session_id)
 
                 keep_open = False
 
             else:
 
-                # Display the reason menu again if the choice is invalid
+                
                 selected_feeling = sessions[session_id]["feeling"]
 
                 msg = (
@@ -110,18 +109,18 @@ def ussd(req: NALORequest):
 
         else:
 
-            # Retrieve the feeling selected by the user
+            
             selected_feeling = feelings.get(choice)
 
             if selected_feeling:
 
-                # Store the selected feeling in the session
+                
                 sessions[session_id] = {
                     "stage": "reason_menu",
                     "feeling": selected_feeling
                 }
 
-                # Display the reason menu
+                
                 msg = (
                     f"Why are you {selected_feeling.lower()}?\n"
                     "1. Relationship issues\n"
@@ -133,7 +132,7 @@ def ussd(req: NALORequest):
 
             else:
 
-                # Invalid main menu selection
+                
                 msg = (
                     "Invalid choice. "
                     "Please select 1, 2 or 3."
@@ -141,11 +140,11 @@ def ussd(req: NALORequest):
 
                 keep_open = True
 
-    # Keep the response within 120 characters
+    
     if len(msg) > 120:
         msg = msg[:120]
 
-    # Response to NALO
+    
     reply = {
         "USERID": req.USERID or "AIK12357",
         "MSISDN": req.MSISDN,
